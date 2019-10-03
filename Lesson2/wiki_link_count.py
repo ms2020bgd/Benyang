@@ -30,7 +30,11 @@ def judge_link(link):
     :return: true or false
     """
     # simple case
+    if 'href' not in link.attrs:
+        return False
     if link.attrs['href'].startswith('/wiki/Help'):
+        return False
+    if link.attrs['href'].startswith('#cite'):
         return False
     if 'class' in link.attrs and 'mw-redirect' in link.attrs['class']:
         return False
@@ -71,14 +75,17 @@ def get_word(word):
     html = data['parse']['text']['*']
     soup = BeautifulSoup(html, features="html.parser")
     # simple case to choose link
-    links = soup.select("p>a")
-    for link in links:
-        # print(link)
-        if judge_link(link):
-            word_new = link.attrs['href'].split("/")[-1]
-            # print(word_new)
-            if judge_word(word_new):
-                return word_new
+    ps = soup.find_all("p", class_="")
+    for p in ps:
+        # print(p)
+        links = p.find_all("a")
+        for link in links:
+            # print(link)
+            if judge_link(link):
+                word_new = link.attrs['href'].split("/")[-1]
+                # print(word_new)
+                if judge_word(word_new):
+                    return word_new
 
     print("no new word is found")
     return -1
